@@ -164,32 +164,26 @@ public class LocacaoServiceTest {
     //Forma nova
 	@Test
 	public void testeFilmeVazio() throws FilmeSemEstoqueException, LocadoraException{
-
 		//Cenario
 		Usuario usuario = new Usuario("Usuario 1");
 		exp.equals(LocadoraException.class);
 		exp.expectMessage("Filme vazio");
-
 		//Acao
 		ReflectionTestUtils.setField(locacaoService,"recebe","Ola tudo bem");
 		locacaoService.alugarFilme(usuario,null);
-
-
-
 
 	}
 
 	@Test
 	public void descontoDoFilme75Porcento() throws FilmeSemEstoqueException, LocadoraException {
+
 		//Cenario
 		Usuario usurio = new Usuario("Nelson 1");
-		List<Filme> filmes = Arrays.asList(new Filme("Filme",2,5.0));
+		List<Filme> filmes = Arrays.asList(new Filme("Filme",2,11.0));
 
 		//Acao
 		Locacao locacao= locacaoService.alugarFilme(usurio,filmes);
-
 		assertThat(locacao.getValor(),is(11.0));
 
 	}
-
 }
