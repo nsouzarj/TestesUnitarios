@@ -172,6 +172,7 @@ public class LocacaoServiceTest {
 		Usuario usuario = new Usuario("Usuario 1");
 		exp.equals(LocadoraException.class);
 		exp.expectMessage("Filme vazio");
+		
 
 		//Acao
 		ReflectionTestUtils.setField(locacaoService,"recebe","Ola tudo bem");
