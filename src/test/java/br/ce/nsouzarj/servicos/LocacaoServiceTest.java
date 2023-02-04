@@ -117,11 +117,13 @@ public class LocacaoServiceTest {
 
 	@Test
 	public void  testeLocacaoFilmeSemEstoque2(){
+
         //cenario
 		Usuario usuario = new Usuario("Usuario 1");
 		ArrayList<Filme> filmes = new ArrayList<>();
 		Filme filme = new Filme("Filme 1", 2, 5.0);
 		filmes.add(filme);
+
 		//acao
 		try {
 			locacaoService.alugarFilme(usuario, filmes);
@@ -138,6 +140,7 @@ public class LocacaoServiceTest {
 		Usuario usuario = new Usuario("Usuario 1");
 		Filme filme = new Filme("Filme 1", 0, 5.0);
         filmes.add(filme);
+
 		//Acao
 		locacaoService.alugarFilme(usuario, filmes);
 
@@ -164,10 +167,12 @@ public class LocacaoServiceTest {
     //Forma nova
 	@Test
 	public void testeFilmeVazio() throws FilmeSemEstoqueException, LocadoraException{
+
 		//Cenario
 		Usuario usuario = new Usuario("Usuario 1");
 		exp.equals(LocadoraException.class);
 		exp.expectMessage("Filme vazio");
+
 		//Acao
 		ReflectionTestUtils.setField(locacaoService,"recebe","Ola tudo bem");
 		locacaoService.alugarFilme(usuario,null);
