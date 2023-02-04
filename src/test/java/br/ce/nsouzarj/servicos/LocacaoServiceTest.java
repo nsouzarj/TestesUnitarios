@@ -62,17 +62,17 @@ public class LocacaoServiceTest {
 	}
 
 	@Test
-	public void testeLocacao() throws Exception {
+	public void deveAlugarFilmeComSuceso() throws Exception {
 
 		//cenario
 		//LocacaoService service = new LocacaoService();
 		ArrayList<Filme> filmeList = new ArrayList<>();
 		Usuario usuario = new Usuario("Usuario 1");
-		Filme filme1 = new Filme("Filme 1", 1, 5.0);
+		Filme filme1 = new Filme("Filme 1", 1, 4.0);
 		filmeList.add(filme1);
-		Filme filme2 = new Filme("Filme 2", 1, 5.0);
+		Filme filme2 = new Filme("Filme 2", 1, 4.0);
 		filmeList.add(filme2);
-		Filme filme3 = new Filme("Filme 3", 1, 5.0);
+		Filme filme3 = new Filme("Filme 3", 1, 4.0);
 		filmeList.add(filme3);
 
 
@@ -80,29 +80,26 @@ public class LocacaoServiceTest {
 		//acao
 		Locacao locacao = locacaoService.alugarFilme(usuario, filmeList);
 		//Uso do Assert.that
-		assertThat(locacao.getValor(),is(15.0));
+		assertThat(locacao.getValor(),is(11.0));
 		assertThat(locacao.getValor(),is(CoreMatchers.not(6.0)));
 		assertThat(isMesmaData(locacao.getDataLocacao(), new Date()),is(true));
 		assertThat(isMesmaData(locacao.getDataRetorno(), DataUtils.obterDataComDiferencaDias(1)),is(true));
 
 
-//		assertThat(locacao.getValor(),is(equalTo(5.0)));
-//		assertThat(isMesmaData(locacao.getDataRetorno(),obterDataComDiferencaDias(1)),
-//				is(true));
 
-			//Uso do error conector - verificacao
-			error.checkThat(locacao.getValor(), is(equalTo(15.0)) );
-			error.checkThat(isMesmaData(locacao.getDataLocacao(), new Date()),is(true));
-			error.checkThat(isMesmaData(locacao.getDataRetorno(), DataUtils.obterDataComDiferencaDias(1)),is(true));
-			//verificacao
-			Assert.assertEquals(15.0,locacao.getValor(),0.01);
-			Assert.assertTrue(locacao.getValor() == 15.0);
-			Assert.assertTrue(isMesmaData(locacao.getDataLocacao(), new Date()));Assert.assertTrue(isMesmaData(locacao.getDataRetorno(), DataUtils.obterDataComDiferencaDias(1)));
+		//Uso do error conector - verificacao
+		error.checkThat(locacao.getValor(), is(equalTo(11.0)) );
+		error.checkThat(isMesmaData(locacao.getDataLocacao(), new Date()),is(true));
+		error.checkThat(isMesmaData(locacao.getDataRetorno(), DataUtils.obterDataComDiferencaDias(1)),is(true));
+		//verificacao
+		Assert.assertEquals(11.0,locacao.getValor(),0.01);
+		Assert.assertTrue(locacao.getValor() == 11.0);
+		Assert.assertTrue(isMesmaData(locacao.getDataLocacao(), new Date()));Assert.assertTrue(isMesmaData(locacao.getDataRetorno(), DataUtils.obterDataComDiferencaDias(1)));
 
 	}
   //Forma elegante
 	@Test(expected = FilmeSemEstoqueException.class)
-	public void  testeLocacaoFilmeSemEstoque1() throws Exception {
+	public void  deveLancarExcecaoAoAlugarFilmeSemEstoque() throws Exception {
 
 		//cenario
         ArrayList<Filme> filmes = new ArrayList<>();
@@ -138,7 +135,7 @@ public class LocacaoServiceTest {
 		//cenario
 		ArrayList<Filme> filmes = new ArrayList<>();
 		Usuario usuario = new Usuario("Usuario 1");
-		Filme filme = new Filme("Filme 1", 0, 5.0);
+		Filme filme = new Filme("Filme 1", 0, 4.0);
         filmes.add(filme);
 
 		//Acao
@@ -181,7 +178,7 @@ public class LocacaoServiceTest {
 	}
 
 	@Test
-	public void descontoDoFilme75Porcento() throws FilmeSemEstoqueException, LocadoraException {
+	public void testeFilmesEmEstoqueSemDescopnto() throws FilmeSemEstoqueException, LocadoraException {
 
 		//Cenario
 		Usuario usurio = new Usuario("Nelson 1");
@@ -192,4 +189,87 @@ public class LocacaoServiceTest {
 		assertThat(locacao.getValor(),is(11.0));
 
 	}
+
+	@Test
+	public void devePagar75pcNoTerceiroFilme() throws FilmeSemEstoqueException, LocadoraException {
+
+		//Cenario
+		Usuario usurio = new Usuario("Nelson 1");
+		Filme filme1= new Filme("Filme1",2,4.0);
+		Filme filme2= new Filme("Filme2",2,4.0);
+		Filme filme3= new Filme("Filme3",2,4.0);
+		List<Filme> filmes = Arrays.asList(filme1,filme2,filme3);
+
+		//Acao
+		Locacao locacao= locacaoService.alugarFilme(usurio,filmes);
+
+		//Verificacao 4+4+3
+		assertThat(locacao.getValor(),is(11.0));
+
+	}
+	@Test
+	public void devePagar50pcNoQuatroFilme() throws FilmeSemEstoqueException, LocadoraException {
+		//Cenario
+		Usuario usurio = new Usuario("Nelson 1");
+		Filme filme1= new Filme("Filme1",2,4.0);
+		Filme filme2= new Filme("Filme2",2,4.0);
+		Filme filme3= new Filme("Filme3",2,4.0);
+		Filme filme4= new Filme("Filme3",2,4.0);
+		List<Filme> filmes = Arrays.asList(filme1,filme2,filme3,filme4);
+
+		//Acao
+		Locacao locacao= locacaoService.alugarFilme(usurio,filmes);
+
+		//Verificacao 4+4+3+2
+		assertThat(locacao.getValor(),is(13.0));
+
+	}
+	@Test
+	public void devePagar25pcNoQuintoFilme() throws FilmeSemEstoqueException, LocadoraException {
+		//Cenario
+		Usuario usurio = new Usuario("Nelson 1");
+		Filme filme1= new Filme("Filme1",2,4.0);
+		Filme filme2= new Filme("Filme2",2,4.0);
+		Filme filme3= new Filme("Filme3",2,4.0);
+		Filme filme4= new Filme("Filme3",2,4.0);
+		Filme filme5= new Filme("Filme3",2,4.0);
+		List<Filme> filmes = Arrays.asList(filme1,filme2,filme3,filme4,filme5);
+
+		//Acao
+		Locacao locacao= locacaoService.alugarFilme(usurio,filmes);
+
+		//Verificacao 4+4+3+2+1
+		assertThat(locacao.getValor(),is(14.0));
+
+	}
+
+	@Test
+	public void devePagar0pcNoSextoFilme() throws FilmeSemEstoqueException, LocadoraException {
+		//Cenario
+		Usuario usurio = new Usuario("Nelson 1");
+		Filme filme1= new Filme("Filme1",2,4.0);
+		Filme filme2= new Filme("Filme2",2,4.0);
+		Filme filme3= new Filme("Filme3",2,4.0);
+		Filme filme4= new Filme("Filme3",2,4.0);
+		Filme filme5= new Filme("Filme3",2,4.0);
+		Filme filme6= new Filme("Filme3",2,4.0);
+		List<Filme> filmes = Arrays.asList(filme1,filme2,filme3,filme4,filme5,filme6);
+
+		//Acao
+		Locacao locacao= locacaoService.alugarFilme(usurio,filmes);
+
+		//Verificacao 4+4+3+2+1
+		assertThat(locacao.getValor(),is(14.0));
+
+	}
+
+	@Test
+	public void naoDeveAlugarFilmeNoDomingo(){
+
+	}
+
+
+
+
+
 }

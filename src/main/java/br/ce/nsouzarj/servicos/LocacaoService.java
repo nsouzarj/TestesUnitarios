@@ -27,18 +27,28 @@ public class LocacaoService {
 		if(filmes.isEmpty()){
 			throw  new FilmeSemEstoqueException("Aluguel sem filmes");
 		}
-		for(Filme f: filmes){
-			estoqueFilme=estoqueFilme+f.getEstoque();
-			if(estoqueFilme==0) {
-				throw  new FilmeSemEstoqueException("Filme sem estoque");
-			}
-			valorTtotal=valorTtotal+f.getPrecoLocacao();
-		}
+
 
 		for(int i=0; i < filmes.size(); i++){
 			Filme filme= filmes.get(i);
+			if(filme.getEstoque()==0){
+				throw  new FilmeSemEstoqueException("Filme sem estoque");
+			}
 			Double valorFilme = filme.getPrecoLocacao();
 
+			switch (i){
+				case 2: valorFilme=valorFilme*0.75;
+				break;
+				case 3: valorFilme=valorFilme*0.5;
+				break;
+				case 4: valorFilme=valorFilme*0.25;
+				break;
+				case 5: valorFilme=0.0;
+				break;
+
+			}
+
+			valorTtotal+=valorFilme;
 		}
 
 
@@ -46,8 +56,6 @@ public class LocacaoService {
 		locacao.setFilme(filmes);
 		locacao.setUsuario(usuario);
 		locacao.setDataLocacao(new Date());
-
-
 		locacao.setValor(valorTtotal);
 		locacao.setTotalAluguel(estoqueFilme);
 		
