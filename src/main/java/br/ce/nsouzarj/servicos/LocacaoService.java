@@ -2,6 +2,7 @@ package br.ce.nsouzarj.servicos;
 
 import static br.ce.nsouzarj.utils.DataUtils.adicionarDias;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -10,6 +11,7 @@ import br.ce.nsouzarj.entidades.Locacao;
 import br.ce.nsouzarj.entidades.Usuario;
 import br.ce.nsouzarj.exceptions.FilmeSemEstoqueException;
 import br.ce.nsouzarj.exceptions.LocadoraException;
+import br.ce.nsouzarj.utils.DataUtils;
 
 public class LocacaoService {
 	private String recebe;
@@ -62,6 +64,9 @@ public class LocacaoService {
 		//Entrega no dia seguinte
 		Date dataEntrega = new Date();
 		dataEntrega = adicionarDias(dataEntrega, 1);
+		if(DataUtils.verificarDiaSemana(dataEntrega, Calendar.SUNDAY)){
+			dataEntrega = adicionarDias(dataEntrega, 1);
+		}
 		locacao.setDataRetorno(dataEntrega);
 		
 		//Salvando a locacao...	
