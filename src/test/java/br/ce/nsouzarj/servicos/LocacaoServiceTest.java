@@ -1,25 +1,23 @@
 package br.ce.nsouzarj.servicos;
 
 
-
-import java.lang.reflect.ReflectPermission;
-import java.util.*;
-
-import br.ce.nsouzarj.exceptions.FilmeSemEstoqueException;
-import br.ce.nsouzarj.exceptions.LocadoraException;
-import org.hamcrest.CoreMatchers;
-import org.junit.*;
-
 import br.ce.nsouzarj.entidades.Filme;
 import br.ce.nsouzarj.entidades.Locacao;
 import br.ce.nsouzarj.entidades.Usuario;
+import br.ce.nsouzarj.exceptions.FilmeSemEstoqueException;
+import br.ce.nsouzarj.exceptions.LocadoraException;
+import br.ce.nsouzarj.matchers.MatchersProprios;
 import br.ce.nsouzarj.utils.DataUtils;
+import org.hamcrest.CoreMatchers;
+import org.junit.*;
 import org.junit.rules.ErrorCollector;
 import org.junit.rules.ExpectedException;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.*;
 
-import static br.ce.nsouzarj.utils.DataUtils.*;
+import static br.ce.nsouzarj.matchers.MatchersProprios.*;
+import static br.ce.nsouzarj.utils.DataUtils.isMesmaData;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -59,8 +57,9 @@ public class LocacaoServiceTest {
 
 	@Test
 	public void deveAlugarFilmeComSuceso() throws Exception {
-
-		Assume.assumeTrue(DataUtils.verificarDiaSemana(new Date(),Calendar.SATURDAY));
+		Calendar calendar = Calendar.getInstance();
+		calendar.set(2023,1,5);
+		Assume.assumeTrue(DataUtils.verificarDiaSemana(calendar.getTime(),Calendar.SUNDAY));
 
 		//cenario
 		ArrayList<Filme> filmeList = new ArrayList<>();
@@ -79,17 +78,17 @@ public class LocacaoServiceTest {
 		assertThat(locacao.getValor(),is(11.0));
 		assertThat(locacao.getValor(),is(CoreMatchers.not(6.0)));
 		assertThat(isMesmaData(locacao.getDataLocacao(), new Date()),is(true));
-		assertThat(isMesmaData(locacao.getDataRetorno(), DataUtils.obterDataComDiferencaDias(1)),is(false));
+		assertThat(isMesmaData(locacao.getDataRetorno(), DataUtils.obterDataComDiferencaDias(1)),is(true));
 
 		//Uso do error conector - verificacao
 		error.checkThat(locacao.getValor(), is(equalTo(11.0)) );
 		error.checkThat(isMesmaData(locacao.getDataLocacao(), new Date()),is(true));
-		error.checkThat(isMesmaData(locacao.getDataRetorno(), DataUtils.obterDataComDiferencaDias(1)),is(false));
+		error.checkThat(isMesmaData(locacao.getDataRetorno(), DataUtils.obterDataComDiferencaDias(1)),is(true));
 
 		//verificacao
 		Assert.assertEquals(11.0,locacao.getValor(),0.01);
 		Assert.assertTrue(locacao.getValor() == 11.0);
-		Assert.assertTrue(isMesmaData(locacao.getDataLocacao(), new Date()));Assert.assertFalse(isMesmaData(locacao.getDataRetorno(), DataUtils.obterDataComDiferencaDias(1)));
+		Assert.assertTrue(isMesmaData(locacao.getDataLocacao(), new Date()));Assert.assertFalse(isMesmaData(locacao.getDataRetorno(), DataUtils.obterDataComDiferencaDias(0)));
 
 	}
   //Forma elegante
@@ -261,7 +260,11 @@ public class LocacaoServiceTest {
 
 	@Test
 	public void naoDeveAlugarFilmeNoDomingo() throws FilmeSemEstoqueException, LocadoraException {
-        Assume.assumeTrue(DataUtils.verificarDiaSemana(new Date(),Calendar.SATURDAY));
+		Calendar calendar =  Calendar.getInstance();
+		//Setei a data na mao
+		calendar.set(2023,1,4);
+
+        Assume.assumeTrue(DataUtils.verificarDiaSemana(calendar.getTime(),Calendar.SATURDAY));
 
 		//Cenario
 		Usuario usuario = new Usuario("Nelson");
@@ -272,8 +275,54 @@ public class LocacaoServiceTest {
 		Locacao locacao= locacaoService.alugarFilme(usuario,filmes);
 
 		//Verificacao
-		boolean ehSegunda=DataUtils.verificarDiaSemana(locacao.getDataRetorno(),Calendar.MONDAY);
+		boolean ehSegunda=DataUtils.verificarDiaSemana(locacao.getDataRetorno(),Calendar.SATURDAY);
+        Assert.assertFalse(ehSegunda);
+
+
+	}
+
+	@Test
+	public void deveDevolverNaSegundaAoAlugarNoSabado() throws FilmeSemEstoqueException, LocadoraException {
+		Calendar calendar =  Calendar.getInstance();
+		//Setei a data na mao
+		calendar.set(2023,2,6);
+		Assume.assumeTrue(DataUtils.verificarDiaSemana(calendar.getTime(),Calendar.MONDAY));
+
+		//Cenario
+		Usuario usuario = new Usuario("Nelson");
+		List<Filme> filmes = Arrays.asList(new Filme("Filme1", 2, 5.0));
+
+
+		//Acao
+		Locacao locacao= locacaoService.alugarFilme(usuario,filmes);
+
+		//Verificacao
+        boolean ehSegunda=DataUtils.verificarDiaSemana(locacao.getDataRetorno(),Calendar.MONDAY);
         Assert.assertTrue(ehSegunda);
+		assertThat(locacao.getDataRetorno(), caiEm(Calendar.MONDAY));
+		assertThat(locacao.getDataRetorno(), caiNumaSegunda());
+
+
+	}
+
+	@Test
+	public void deveDevolverNaSegundaAoAlugarNoSabadoDesafio() throws FilmeSemEstoqueException, LocadoraException {
+		Calendar calendar =  Calendar.getInstance();
+		Date date = DataUtils.obterData(5,2,2023);
+		Assume.assumeTrue(DataUtils.verificarDiaSemana(date,Calendar.SUNDAY));
+
+		//Cenario
+		Usuario usuario = new Usuario("Nelson");
+		List<Filme> filmes = Arrays.asList(new Filme("Filme1", 2, 5.0));
+
+
+		//Acao
+		Locacao locacao= locacaoService.alugarFilme(usuario,filmes);
+
+		//Verificacao
+		error.checkThat(locacao.getDataRetorno(), ehHojeComDiferenciaDias(1));
+		error.checkThat(locacao.getDataLocacao(), ehHoje());
+
 
 
 	}
