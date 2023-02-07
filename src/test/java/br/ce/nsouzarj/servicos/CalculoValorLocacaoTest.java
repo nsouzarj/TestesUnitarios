@@ -61,7 +61,6 @@ public class CalculoValorLocacaoTest {
                {Arrays.asList(filme1,filme2,filme3,filme4,filme5), 14.0,"5 Filens: 70%"},
                {Arrays.asList(filme1,filme2,filme3,filme4,filme5, filme6),14.0,"6 Filens: 100%"},
                {Arrays.asList(filme1,filme2,filme3,filme4,filme5, filme6,filme7),18.0,"7 Filmes sem desconto"}
-
        });
     }
 
