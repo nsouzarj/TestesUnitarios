@@ -1,5 +1,7 @@
 package br.ce.nsouzarj.entidades;
 
+import java.util.Objects;
+
 public class Filme {
 
 	private String nome;
@@ -31,5 +33,26 @@ public class Filme {
 	}
 	public void setPrecoLocacao(Double precoLocacao) {
 		this.precoLocacao = precoLocacao;
+	}
+
+	@Override
+	public boolean equals (Object o) {
+		if (this == o) return true;
+		if (!(o instanceof Filme filme)) return false;
+		return Objects.equals(nome, filme.nome) && Objects.equals(estoque, filme.estoque) && Objects.equals(precoLocacao, filme.precoLocacao);
+	}
+
+	@Override
+	public int hashCode () {
+		return Objects.hash(nome, estoque, precoLocacao);
+	}
+
+	@Override
+	public String toString () {
+		return "Filme{" +
+				"nome='" + nome + '\'' +
+				", estoque=" + estoque +
+				", precoLocacao=" + precoLocacao +
+				'}';
 	}
 }

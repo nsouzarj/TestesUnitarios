@@ -1,5 +1,7 @@
 package br.ce.nsouzarj.servicos;
 
+import br.ce.nsouzarj.builder.FilmeBuilder;
+import br.ce.nsouzarj.dao.LocacaoDao;
 import br.ce.nsouzarj.entidades.Filme;
 import br.ce.nsouzarj.entidades.Locacao;
 import br.ce.nsouzarj.entidades.Usuario;
@@ -9,11 +11,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.mockito.Mockito;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
+import static br.ce.nsouzarj.builder.FilmeBuilder.*;
+import static br.ce.nsouzarj.builder.UsuarioBuilder.usuarioBuilder;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -33,16 +38,20 @@ public class CalculoValorLocacaoTest {
     @Before
     public void inicio(){
         locacaoService=new LocacaoService();
+        LocacaoDao locacaoDao = Mockito.mock(LocacaoDao.class);
+        locacaoService.setLocacaoDao(locacaoDao);
+        SPCService spcService = Mockito.mock(SPCService.class);
+        locacaoService.setSpcService(spcService);
     }
     //Cenario
-    private Usuario usurio = new Usuario("Nelson 1");
-    private static Filme filme1= new Filme("Filme1",2,4.0);
-    private static Filme filme2= new Filme("Filme2",2,4.0);
-    private static Filme filme3= new Filme("Filme3",2,4.0);
-    private static Filme filme4= new Filme("Filme4",2,4.0);
-    private static Filme filme5= new Filme("Filme5",2,4.0);
-    private static Filme filme6= new Filme("Filme6",2,4.0);
-    private static Filme filme7= new Filme("Filme7",2,4.0);
+    private Usuario usuario = usuarioBuilder().getUsuario();
+    private static Filme filme1= filmeBuilder().agora();
+    private static Filme filme2= filmeBuilder().agora();
+    private static Filme filme3= filmeBuilder().agora();
+    private static Filme filme4= filmeBuilder().agora();
+    private static Filme filme5= filmeBuilder().agora();
+    private static Filme filme6= filmeBuilder().agora();
+    private static Filme filme7= filmeBuilder().agora();
     @Parameterized.Parameters(name =  "{2}")
     public static Collection<Object[]> getParametros(){
        return Arrays.asList(new Object[][]{
@@ -60,7 +69,8 @@ public class CalculoValorLocacaoTest {
     public void deveCalcularValorGenerico() throws FilmeSemEstoqueException, LocadoraException {
 
         //Cenario
-        Usuario usuario = new Usuario("Nelson 1");
+        Usuario usuario = usuarioBuilder().getUsuario();
+
         //Acao
         Locacao locacao = locacaoService.alugarFilme(usuario, filmes);
 

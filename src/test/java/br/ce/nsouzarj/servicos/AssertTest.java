@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import java.lang.*;
 
+import static br.ce.nsouzarj.builder.UsuarioBuilder.usuarioBuilder;
 
 
 public class AssertTest {
@@ -23,8 +24,10 @@ public class AssertTest {
         Assert.assertEquals(i,x.intValue());        Assert.assertEquals("bola","bola");
         Assert.assertTrue("bola".equalsIgnoreCase("Bola"));
         Assert.assertNotEquals("bola","casa");
-        Usuario u1 = new Usuario("Nelson");
-        Usuario u2 = new Usuario("Nelson");
+        Usuario usuario1 = usuarioBuilder().getUsuario();
+        Usuario usuario2 = usuarioBuilder().getUsuario();
+        Usuario u1 = usuario1;
+        Usuario u2 = usuario2;
         Usuario u3 = u2;
         Usuario u4 = null;
 

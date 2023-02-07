@@ -6,6 +6,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import br.ce.nsouzarj.dao.LocacaoDao;
 import br.ce.nsouzarj.entidades.Filme;
 import br.ce.nsouzarj.entidades.Locacao;
 import br.ce.nsouzarj.entidades.Usuario;
@@ -14,21 +15,26 @@ import br.ce.nsouzarj.exceptions.LocadoraException;
 import br.ce.nsouzarj.utils.DataUtils;
 
 public class LocacaoService {
+	private LocacaoDao locacaoDao;
+	private SPCService spcService;
+	private EmailService emailService;
 	private String recebe;
 	private double  valorTtotal=0.0;
 	private int estoqueFilme=0;
-	
+
+
 	public Locacao alugarFilme(Usuario usuario, List<Filme> filmes) throws FilmeSemEstoqueException, LocadoraException {
 
 		if(usuario==null){
-			throw new LocadoraException("Usuario vazio");
+			throw new LocadoraException("Usuario vazio.");
 		}
 		if(filmes==null ){
-			throw new LocadoraException("Filme vazio");
+			throw new LocadoraException("Filme vazio.");
 		}
 		if(filmes.isEmpty()){
-			throw  new FilmeSemEstoqueException("Aluguel sem filmes");
+			throw  new FilmeSemEstoqueException("Aluguel sem filmes.");
 		}
+
 
 
 		for(int i=0; i < filmes.size(); i++){
@@ -53,6 +59,9 @@ public class LocacaoService {
 			valorTtotal+=valorFilme;
 		}
 
+        if(spcService.possuiNegativacao(usuario)){
+			throw new LocadoraException("Usuario "+usuario.getNome()+" esta negativado");
+		}
 
 		Locacao locacao = new Locacao();
 		locacao.setFilme(filmes);
@@ -71,6 +80,27 @@ public class LocacaoService {
 		
 		//Salvando a locacao...	
 		//TODO adicionar método para salvar
+		locacaoDao.salvar(locacao);
+
 	    return locacao;
+	}
+
+	public void notificarAtrasos(){
+		List<Locacao> locacaos = locacaoDao.obterLocacoesPendentes();
+		for(Locacao locacao: locacaos){
+            emailService.notificarAtraso(locacao.getUsuario());
+		}
+	}
+
+	public void setLocacaoDao(LocacaoDao locacaoDao){
+		this.locacaoDao=locacaoDao;
+	}
+
+	public void setSpcService (SPCService spc) {
+		spcService = spc;
+	}
+
+	public void setEmailService (EmailService emailService) {
+		this.emailService = emailService;
 	}
 }
