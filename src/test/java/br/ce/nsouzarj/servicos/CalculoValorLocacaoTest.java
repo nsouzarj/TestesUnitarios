@@ -1,6 +1,5 @@
 package br.ce.nsouzarj.servicos;
 
-import br.ce.nsouzarj.builder.FilmeBuilder;
 import br.ce.nsouzarj.dao.LocacaoDao;
 import br.ce.nsouzarj.entidades.Filme;
 import br.ce.nsouzarj.entidades.Locacao;
@@ -40,11 +39,11 @@ public class CalculoValorLocacaoTest {
         locacaoService=new LocacaoService();
         LocacaoDao locacaoDao = Mockito.mock(LocacaoDao.class);
         locacaoService.setLocacaoDao(locacaoDao);
-        SPCService spcService = Mockito.mock(SPCService.class);
-        locacaoService.setSpcService(spcService);
+        ISPCService ISPCService = Mockito.mock(ISPCService.class);
+        locacaoService.setSpcService(ISPCService);
     }
     //Cenario
-    private Usuario usuario = usuarioBuilder().getUsuario();
+    private Usuario usuario = usuarioBuilder().agora();
     private static Filme filme1= filmeBuilder().agora();
     private static Filme filme2= filmeBuilder().agora();
     private static Filme filme3= filmeBuilder().agora();
@@ -68,7 +67,7 @@ public class CalculoValorLocacaoTest {
     public void deveCalcularValorGenerico() throws FilmeSemEstoqueException, LocadoraException {
 
         //Cenario
-        Usuario usuario = usuarioBuilder().getUsuario();
+        Usuario usuario = usuarioBuilder().agora();
 
         //Acao
         Locacao locacao = locacaoService.alugarFilme(usuario, filmes);

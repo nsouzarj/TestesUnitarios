@@ -15,7 +15,7 @@ public class LocacaoBuilder {
     private Locacao elemento;
     private LocacaoBuilder(){}
 
-    public static LocacaoBuilder umLocacao() {
+    public static LocacaoBuilder umaLocacao() {
         LocacaoBuilder builder = new LocacaoBuilder();
         inicializarDadosPadroes(builder);
         return builder;
@@ -25,7 +25,7 @@ public class LocacaoBuilder {
         builder.elemento = new Locacao();
         Locacao elemento = builder.elemento;
 
-        elemento.setUsuario(usuarioBuilder().getUsuario());
+        elemento.setUsuario(usuarioBuilder().agora());
         elemento.setFilme(Arrays.asList(filmeBuilder().agora()));
         elemento.setDataLocacao(new Date());
         elemento.setDataRetorno(DataUtils.obterDataComDiferencaDias(1));
@@ -66,4 +66,12 @@ public class LocacaoBuilder {
     public Locacao agora() {
         return elemento;
     }
+
+    public LocacaoBuilder atrasado(){
+        elemento.setDataLocacao(DataUtils.obterDataComDiferencaDias(-4));
+        elemento.setDataRetorno(DataUtils.obterDataComDiferencaDias(-2));
+        return this;
+    }
+
+
 }

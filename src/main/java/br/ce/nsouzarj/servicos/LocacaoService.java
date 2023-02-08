@@ -16,8 +16,8 @@ import br.ce.nsouzarj.utils.DataUtils;
 
 public class LocacaoService {
 	private LocacaoDao locacaoDao;
-	private SPCService spcService;
-	private EmailService emailService;
+	private ISPCService ISPCService;
+	private IEmailService IEmailService;
 	private String recebe;
 	private double  valorTtotal=0.0;
 	private int estoqueFilme=0;
@@ -59,7 +59,7 @@ public class LocacaoService {
 			valorTtotal+=valorFilme;
 		}
 
-        if(spcService.possuiNegativacao(usuario)){
+        if(ISPCService.possuiNegativacao(usuario)){
 			throw new LocadoraException("Usuario "+usuario.getNome()+" esta negativado");
 		}
 
@@ -88,7 +88,9 @@ public class LocacaoService {
 	public void notificarAtrasos(){
 		List<Locacao> locacaos = locacaoDao.obterLocacoesPendentes();
 		for(Locacao locacao: locacaos){
-            emailService.notificarAtraso(locacao.getUsuario());
+			if(locacao.getDataRetorno().before(new Date())) {
+				IEmailService.notificarAtraso(locacao.getUsuario());
+			}
 		}
 	}
 
@@ -96,11 +98,11 @@ public class LocacaoService {
 		this.locacaoDao=locacaoDao;
 	}
 
-	public void setSpcService (SPCService spc) {
-		spcService = spc;
+	public void setSpcService (ISPCService spc) {
+		ISPCService = spc;
 	}
 
-	public void setEmailService (EmailService emailService) {
-		this.emailService = emailService;
+	public void setEmailService (IEmailService IEmailService) {
+		this.IEmailService = IEmailService;
 	}
 }

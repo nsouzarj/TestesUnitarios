@@ -2,6 +2,6 @@ package br.ce.nsouzarj.servicos;
 
 import br.ce.nsouzarj.entidades.Usuario;
 
-public interface EmailService {
+public interface IEmailService {
     void notificarAtraso(Usuario usuario);
 }

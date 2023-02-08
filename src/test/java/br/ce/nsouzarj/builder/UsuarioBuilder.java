@@ -4,27 +4,29 @@ import br.ce.nsouzarj.entidades.Usuario;
 
 public class UsuarioBuilder {
     private Usuario usuario;
-    private UsuarioBuilder(){
+    private UsuarioBuilder(){}
 
+    public static UsuarioBuilder usuarioBuilder() {
+        UsuarioBuilder builder = new UsuarioBuilder();
+        inicializarDadosPadroes(builder);
+        return builder;
     }
 
-    public static UsuarioBuilder usuarioBuilder(){
+    public static void inicializarDadosPadroes(UsuarioBuilder builder) {
+        builder.usuario = new Usuario();
+        Usuario elemento = builder.usuario;
 
-        UsuarioBuilder usuarioBuilder = new UsuarioBuilder();
-        usuarioBuilder.usuario= new Usuario();
-        usuarioBuilder.usuario.setNome("Nelson Seixas de Souza");
-        return usuarioBuilder;
 
+        elemento.setNome("");
     }
 
-
-    public Usuario getUsuario(){
-        return usuario;
-    }
-
-    public UsuarioBuilder comNome(String nome){
-        usuario.setNome(nome);
+    public UsuarioBuilder comNome(String param) {
+        usuario.setNome(param);
         return this;
+    }
+
+    public Usuario agora() {
+        return usuario;
     }
 
 }

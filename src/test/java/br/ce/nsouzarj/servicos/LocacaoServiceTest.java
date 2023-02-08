@@ -1,8 +1,6 @@
 package br.ce.nsouzarj.servicos;
 
 
-import br.ce.nsouzarj.builder.LocacaoBuilder;
-import br.ce.nsouzarj.builder.UsuarioBuilder;
 import br.ce.nsouzarj.dao.LocacaoDao;
 import br.ce.nsouzarj.entidades.Filme;
 import br.ce.nsouzarj.entidades.Locacao;
@@ -14,13 +12,11 @@ import org.hamcrest.CoreMatchers;
 import org.junit.*;
 import org.junit.rules.ErrorCollector;
 import org.junit.rules.ExpectedException;
-import org.mockito.Mock;
 import org.mockito.Mockito;
-import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.test.util.ReflectionTestUtils;
 import java.util.*;
 import static br.ce.nsouzarj.builder.FilmeBuilder.filmeBuilder;
-import static br.ce.nsouzarj.builder.LocacaoBuilder.umLocacao;
+import static br.ce.nsouzarj.builder.LocacaoBuilder.umaLocacao;
 import static br.ce.nsouzarj.builder.UsuarioBuilder.usuarioBuilder;
 import static br.ce.nsouzarj.matchers.MatchersProprios.*;
 import static br.ce.nsouzarj.utils.DataUtils.isMesmaData;
@@ -35,9 +31,9 @@ public class LocacaoServiceTest {
 	@Rule
 	public ExpectedException exception = ExpectedException.none();
 	private LocacaoService locacaoService;
-	private SPCService spcService;
+	private ISPCService ISPCService;
 	private LocacaoDao locacaoDao;
-	private EmailService emailService;
+	private IEmailService IEmailService;
 
 	private static int contador=0;
 	@Before
@@ -45,10 +41,10 @@ public class LocacaoServiceTest {
 	    locacaoService= new LocacaoService();
 		locacaoDao = mock(LocacaoDao.class);
 		locacaoService.setLocacaoDao(locacaoDao);
-		spcService= mock(SPCService.class);
-		locacaoService.setSpcService(spcService);
-		emailService=mock(EmailService.class);
-		locacaoService.setEmailService(emailService);
+		ISPCService = mock(ISPCService.class);
+		locacaoService.setSpcService(ISPCService);
+		IEmailService =mock(IEmailService.class);
+		locacaoService.setEmailService(IEmailService);
 
 
 	}
@@ -62,7 +58,7 @@ public class LocacaoServiceTest {
 
 		//cenario
 		ArrayList<Filme> filmeList = new ArrayList<>();
-		Usuario usuario = usuarioBuilder().getUsuario();
+		Usuario usuario =  usuarioBuilder().agora();
 		Filme filme1 = filmeBuilder().agora();
 		filmeList.add(filme1);
 		Filme filme2 = filmeBuilder().agora();
@@ -97,7 +93,7 @@ public class LocacaoServiceTest {
 
 		//cenario
         ArrayList<Filme> filmes = new ArrayList<>();
-		Usuario usuario = usuarioBuilder().getUsuario();
+		Usuario usuario = usuarioBuilder().agora();
 		Filme filme = filmeBuilder().semEstoque().agora();
 		filmes.add(filme);
 
@@ -110,7 +106,7 @@ public class LocacaoServiceTest {
 	public void  testeLocacaoFilmeSemEstoque2(){
 
         //cenario
-		Usuario usuario = usuarioBuilder().getUsuario();
+		Usuario usuario = usuarioBuilder().agora();
 		ArrayList<Filme> filmes = new ArrayList<>();
 		Filme filme = filmeBuilder().semEstoque().agora();
 		filmes.add(filme);
@@ -118,6 +114,7 @@ public class LocacaoServiceTest {
 		//acao
 		try {
 			locacaoService.alugarFilme(usuario, filmes);
+			Assert.fail();
 		} catch (Exception e) {
 			Assert.assertThat(e.getMessage(),is("Filme sem estoque"));
 		}
@@ -128,7 +125,7 @@ public class LocacaoServiceTest {
 
 		//cenario
 		ArrayList<Filme> filmes = new ArrayList<>();
-		Usuario usuario = usuarioBuilder().getUsuario();
+		Usuario usuario = usuarioBuilder().agora();
 		Filme filme = filmeBuilder().semEstoque().agora();
         filmes.add(filme);
 
@@ -159,7 +156,7 @@ public class LocacaoServiceTest {
 	public void testeFilmeVazio() throws FilmeSemEstoqueException, LocadoraException{
 
 		//Cenario
-		Usuario usuario = usuarioBuilder().getUsuario();
+		Usuario usuario = usuarioBuilder().agora();
 		exception.equals(LocadoraException.class);
 		exception.expectMessage("Filme vazio");
 
@@ -173,7 +170,7 @@ public class LocacaoServiceTest {
 	public void testeFilmesEmEstoqueSemDescopnto() throws FilmeSemEstoqueException, LocadoraException {
 
 		//Cenario
-		Usuario usuario = usuarioBuilder().getUsuario();
+		Usuario usuario = usuarioBuilder().agora();
 		List<Filme> filmes = Arrays.asList(new Filme("Filme",2,11.0));
 
 		//Acao
@@ -267,7 +264,7 @@ public class LocacaoServiceTest {
         Assume.assumeTrue(DataUtils.verificarDiaSemana(calendar.getTime(),Calendar.SATURDAY));
 
 		//Cenario
-		Usuario usuario = usuarioBuilder().getUsuario();
+		Usuario usuario = usuarioBuilder().agora();
 		List<Filme> filmes = Arrays.asList(filmeBuilder().agora());
 
 		//Acao
@@ -286,7 +283,7 @@ public class LocacaoServiceTest {
 		Assume.assumeTrue(DataUtils.verificarDiaSemana(date,Calendar.MONDAY));
 
 		//Cenario
-		Usuario usuario = usuarioBuilder().getUsuario();
+		Usuario usuario = usuarioBuilder().agora();
 		List<Filme> filmes = Arrays.asList(filmeBuilder().agora());
 
 
@@ -306,12 +303,12 @@ public class LocacaoServiceTest {
 
 	@Test
 	public void deveDevolverNaSegundaAoAlugarNoSabadoDesafio() throws FilmeSemEstoqueException, LocadoraException {
-		Calendar calendar =  Calendar.getInstance();
+
 		Date date = DataUtils.obterData(5,2,2023);
 		Assume.assumeTrue(DataUtils.verificarDiaSemana(date,Calendar.SUNDAY));
 
 		//Cenario
-		Usuario usuario = usuarioBuilder().getUsuario();
+		Usuario usuario = usuarioBuilder().agora();
 		List<Filme> filmes = Arrays.asList(filmeBuilder().agora());
 
 		//Acao
@@ -321,15 +318,16 @@ public class LocacaoServiceTest {
 		Filme filme2 = filmeBuilder().comNome("Filme2").agora();
 		Filme filme3 = filmeBuilder().comNome("Filme3").agora();
 
-		umLocacao().comListaFilme(filme1,filme2,filme3);
-		umLocacao().comUsuario(usuario);
-		umLocacao().agora().getDataLocacao();
+		umaLocacao().comListaFilme(filme1,filme2,filme3);
+		umaLocacao().comUsuario(usuario);
+		umaLocacao().agora().getDataLocacao();
 
 		//Verificacao
-		error.checkThat(umLocacao().agora().getDataRetorno(), ehHojeComDiferenciaDias(1));
-		error.checkThat(umLocacao().agora().getDataLocacao(), ehHoje());
+		error.checkThat(umaLocacao().agora().getDataRetorno(), ehHojeComDiferenciaDias(1));
+		error.checkThat(umaLocacao().agora().getDataLocacao(), ehHoje());
 
 	}
+
 
 //	public static void main (String[] args) {
 //		new BuilderMaster().gerarCodigoClasse(Usuario.class);
@@ -339,37 +337,51 @@ public class LocacaoServiceTest {
 	public void naoDeveAlugarFilmeSPCO() throws FilmeSemEstoqueException {
 
 		//Cenario
-		Usuario  usuario1= usuarioBuilder().comNome("Nelson").getUsuario();
-		Usuario  usuario2= usuarioBuilder().comNome("Nelson Caloteiro").getUsuario();
+		Usuario  usuario1= usuarioBuilder().comNome("Nelson").agora();
+		Usuario  usuario2= usuarioBuilder().comNome("Nelson Caloteiro").agora();
 
 		List<Filme> filmes = Arrays.asList(filmeBuilder().agora());
-        when(spcService.possuiNegativacao(usuario1)).thenReturn(false);
+        when(ISPCService.possuiNegativacao(Mockito.any(Usuario.class))).thenReturn(true);
 		//exception.expectMessage("Usuario "+usuario1.getNome()+" esta negativado");
 
 		//Acao
 		try {
-			Locacao locacao= locacaoService.alugarFilme(usuario1, filmes);
+			locacaoService.alugarFilme(usuario1, filmes);
 		} catch (LocadoraException e) {
-			e.printStackTrace();
+			Assert.assertThat(e.getMessage(),is("Usuario "+usuario1.getNome()+" esta negativado"));
 		}
-		verify(spcService).possuiNegativacao(usuario1);
+		verify(ISPCService).possuiNegativacao(usuario1);
 
 	}
 	@Test
 	public void notificaUsuarioComAtrasoDeEntrega(){
 
 		//Cenario
-		Usuario usuario1= usuarioBuilder().comNome("Nelson1").getUsuario();
-		Usuario usuario2= usuarioBuilder().comNome("Nelson2").getUsuario();
-		List<Locacao> locacaoList =
-				Arrays.asList(umLocacao().comUsuario(usuario1).comDataRetorno(DataUtils.obterDataComDiferencaDias(-2)).agora());
+		Usuario usuario1= usuarioBuilder().comNome("Nelson1").agora();
+		Usuario usuario2= usuarioBuilder().comNome("Nelson2").agora();
+		Usuario usuario3= usuarioBuilder().comNome("Nelson3").agora();
+
+		Locacao locacao1=umaLocacao().comUsuario(usuario1).atrasado().agora();
+		Locacao locacao2=umaLocacao().comUsuario(usuario2).agora();
+		Locacao locacao3=umaLocacao().comUsuario(usuario3).atrasado().agora();
+
+		List<Locacao> locacaoList =Arrays.asList(locacao1,locacao2,locacao3);
+
 		when(locacaoDao.obterLocacoesPendentes()).thenReturn(locacaoList);
 
 		//Acao
 		locacaoService.notificarAtrasos();
 
 		//Verificacao
-		verify(emailService).notificarAtraso(usuario1);
+		verify(IEmailService,Mockito.times(2)).notificarAtraso(Mockito.any(Usuario.class));
+
+		verify(IEmailService).notificarAtraso(usuario1);
+
+		verify(IEmailService,never()).notificarAtraso(usuario2);
+
+		verify(IEmailService,Mockito.atLeastOnce()).notificarAtraso(usuario3);
+
+		verifyNoMoreInteractions(IEmailService);
 
 	}
 }

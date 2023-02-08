@@ -24,8 +24,8 @@ public class AssertTest {
         Assert.assertEquals(i,x.intValue());        Assert.assertEquals("bola","bola");
         Assert.assertTrue("bola".equalsIgnoreCase("Bola"));
         Assert.assertNotEquals("bola","casa");
-        Usuario usuario1 = usuarioBuilder().getUsuario();
-        Usuario usuario2 = usuarioBuilder().getUsuario();
+        Usuario usuario1 = usuarioBuilder().agora();
+        Usuario usuario2 = usuarioBuilder().agora();
         Usuario u1 = usuario1;
         Usuario u2 = usuario2;
         Usuario u3 = u2;
