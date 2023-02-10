@@ -25,13 +25,16 @@ public class Usuario {
 	@Override
 	public boolean equals (Object o) {
 		if (this == o) return true;
-		if (!(o instanceof Usuario usuario)) return false;
+		if (!(o instanceof Usuario)) return false;
+
+		Usuario usuario = (Usuario) o;
+
 		return Objects.equals(nome, usuario.nome);
 	}
 
 	@Override
 	public int hashCode () {
-		return Objects.hash(nome);
+		return nome != null ? nome.hashCode() : 0;
 	}
 
 	@Override

@@ -10,7 +10,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -22,9 +26,17 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 @RunWith(Parameterized.class)
+@PowerMockIgnore ("jdk.internal.reflect.*")
 public class CalculoValorLocacaoTest {
 
+    @InjectMocks
     private LocacaoService locacaoService;
+    @Mock
+    LocacaoDao locacaoDao;
+
+    @Mock
+    ISPCService ISPCService;
+
     @Parameterized.Parameter
     public List<Filme> filmes;
     @Parameterized.Parameter(value = 1)
@@ -36,11 +48,12 @@ public class CalculoValorLocacaoTest {
 
     @Before
     public void inicio(){
-        locacaoService=new LocacaoService();
-        LocacaoDao locacaoDao = Mockito.mock(LocacaoDao.class);
-        locacaoService.setLocacaoDao(locacaoDao);
-        ISPCService ISPCService = Mockito.mock(ISPCService.class);
-        locacaoService.setSpcService(ISPCService);
+        MockitoAnnotations.initMocks(this);
+        //locacaoService=new LocacaoService();
+//        LocacaoDao locacaoDao = Mockito.mock(LocacaoDao.class);
+//        locacaoService.setLocacaoDao(locacaoDao);
+//        ISPCService ISPCService = Mockito.mock(ISPCService.class);
+//        locacaoService.setSpcService(ISPCService);
     }
     //Cenario
     private Usuario usuario = usuarioBuilder().agora();

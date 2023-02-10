@@ -58,9 +58,14 @@ public class LocacaoService {
 
 			valorTtotal+=valorFilme;
 		}
-
-        if(ISPCService.possuiNegativacao(usuario)){
-			throw new LocadoraException("Usuario "+usuario.getNome()+" esta negativado");
+		boolean nega;
+		try {
+			 nega=ISPCService.possuiNegativacao(usuario);
+		} catch (Exception e) {
+			throw new LocadoraException("Problemas com SPC, tente novamente");
+		}
+		if(nega){
+			throw new LocadoraException("Usuario negativado");
 		}
 
 		Locacao locacao = new Locacao();
@@ -94,15 +99,27 @@ public class LocacaoService {
 		}
 	}
 
-	public void setLocacaoDao(LocacaoDao locacaoDao){
-		this.locacaoDao=locacaoDao;
+	public void prorrogaLocacao(Locacao locacao, int dias){
+		Locacao novaLocacao = new Locacao();
+		novaLocacao.setUsuario(locacao.getUsuario());
+        novaLocacao.setFilme(locacao.getFilme());
+		novaLocacao.setDataLocacao(new Date());
+		novaLocacao.setDataRetorno(DataUtils.obterDataComDiferencaDias(dias));
+		novaLocacao.setValor(locacao.getValor()*dias);
+		locacaoDao.salvar(novaLocacao);
 	}
 
-	public void setSpcService (ISPCService spc) {
-		ISPCService = spc;
-	}
 
-	public void setEmailService (IEmailService IEmailService) {
-		this.IEmailService = IEmailService;
-	}
+//
+//	public void setLocacaoDao(LocacaoDao locacaoDao){
+//		this.locacaoDao=locacaoDao;
+//	}
+//
+//	public void setSpcService (ISPCService spc) {
+//		ISPCService = spc;
+//	}
+//
+//	public void setEmailService (IEmailService IEmailService) {
+//		this.IEmailService = IEmailService;
+//	}
 }

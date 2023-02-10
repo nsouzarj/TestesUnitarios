@@ -35,4 +35,8 @@ public class FilmeBuilder {
         filme.setNome(comNome);
         return  this;
     }
+    public FilmeBuilder estoqueZero(){
+        filme.setEstoque(0);
+        return this;
+    }
 }

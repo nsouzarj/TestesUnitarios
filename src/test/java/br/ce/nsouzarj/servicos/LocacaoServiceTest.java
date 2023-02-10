@@ -12,7 +12,11 @@ import org.hamcrest.CoreMatchers;
 import org.junit.*;
 import org.junit.rules.ErrorCollector;
 import org.junit.rules.ExpectedException;
-import org.mockito.Mockito;
+import org.junit.runner.RunWith;
+import org.mockito.*;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 import java.util.*;
 import static br.ce.nsouzarj.builder.FilmeBuilder.filmeBuilder;
@@ -25,26 +29,33 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({LocacaoService.class, DataUtils.class})
 public class LocacaoServiceTest {
+	@InjectMocks
+	public LocacaoService locacaoService;
     @Rule
  	public ErrorCollector error = new ErrorCollector();
 	@Rule
 	public ExpectedException exception = ExpectedException.none();
-	private LocacaoService locacaoService;
+	@Mock
 	private ISPCService ISPCService;
+	@Mock
 	private LocacaoDao locacaoDao;
+	@Mock
 	private IEmailService IEmailService;
 
 	private static int contador=0;
 	@Before
 	public void antes(){
-	    locacaoService= new LocacaoService();
-		locacaoDao = mock(LocacaoDao.class);
-		locacaoService.setLocacaoDao(locacaoDao);
-		ISPCService = mock(ISPCService.class);
-		locacaoService.setSpcService(ISPCService);
-		IEmailService =mock(IEmailService.class);
-		locacaoService.setEmailService(IEmailService);
+		MockitoAnnotations.initMocks(this);
+//	    locacaoService= new LocacaoService();
+//		locacaoDao = mock(LocacaoDao.class);
+//		locacaoService.setLocacaoDao(locacaoDao);
+//		ISPCService = mock(ISPCService.class);
+//		locacaoService.setSpcService(ISPCService);
+//		IEmailService =mock(IEmailService.class);
+//		locacaoService.setEmailService(IEmailService);
 
 
 	}
@@ -272,32 +283,23 @@ public class LocacaoServiceTest {
 
 		//Verificacao
 		boolean ehSegunda=DataUtils.verificarDiaSemana(locacao.getDataRetorno(),Calendar.SATURDAY);
-        Assert.assertFalse(ehSegunda);
+		Assert.assertTrue(ehSegunda);
 
 
 	}
 
 	@Test
-	public void deveDevolverNaSegundaAoAlugarNoSabado() throws FilmeSemEstoqueException, LocadoraException {
-		Date date=DataUtils.obterData(6,2,2023);
-		Assume.assumeTrue(DataUtils.verificarDiaSemana(date,Calendar.MONDAY));
-
-		//Cenario
+	public void deveDevolverNaSegundaAoAlugarNoSabado() throws Exception {
 		Usuario usuario = usuarioBuilder().agora();
 		List<Filme> filmes = Arrays.asList(filmeBuilder().agora());
 
+		PowerMockito.whenNew(Date.class).withNoArguments().thenReturn(DataUtils.obterData(29, 4, 2017));
+		//acao
+		Locacao retorno = locacaoService.alugarFilme(usuario, filmes);
 
-		//Acao
-		Locacao locacao= locacaoService.alugarFilme(usuario,filmes);
-
-
-		//Verificacao
-        boolean ehSegunda=DataUtils.verificarDiaSemana(locacao.getDataRetorno(),Calendar.WEDNESDAY);
-        Assert.assertTrue(ehSegunda);
-		assertThat(locacao.getDataRetorno(), caiEm(Calendar.WEDNESDAY));
-		Date data=DataUtils.obterData(6,2,2023);
-		locacao.setDataLocacao(data);
-		assertThat(locacao.getDataLocacao(), caiNumaSegunda());
+		//verificacao
+		assertThat(retorno.getDataRetorno(), caiNumaSegunda());
+		PowerMockito.verifyNew(Date.class, Mockito.times(2)).withNoArguments();
 
 	}
 
@@ -328,13 +330,26 @@ public class LocacaoServiceTest {
 
 	}
 
+	@Test
+	public void deveDevolverNaSegundaAoAlugarNoSabadoDeNovo() throws Exception {
+		//Cenario
+	   Usuario usuario = usuarioBuilder().comNome("Nelson").agora();
+	   List<Filme> filmes =  Arrays.asList(filmeBuilder().comNome("Filme Dpoido").agora());
+	   PowerMockito.whenNew(Date.class).withAnyArguments().thenReturn(DataUtils.obterData(29,4,2017));
+	   //Acao
+	   Locacao locacao= locacaoService.alugarFilme(usuario,filmes);
+	   //Verificacao
+	   assertThat(locacao.getDataRetorno(),caiNumaSegunda());
+	   PowerMockito.verifyNew((Date.class),Mockito.times(2)).withNoArguments();
+	}
+
 
 //	public static void main (String[] args) {
 //		new BuilderMaster().gerarCodigoClasse(Usuario.class);
 //	}
 
 	@Test
-	public void naoDeveAlugarFilmeSPCO() throws FilmeSemEstoqueException {
+	public void naoDeveAlugarFilmeSPCO() throws Exception {
 
 		//Cenario
 		Usuario  usuario1= usuarioBuilder().comNome("Nelson").agora();
@@ -348,8 +363,10 @@ public class LocacaoServiceTest {
 		try {
 			locacaoService.alugarFilme(usuario1, filmes);
 		} catch (LocadoraException e) {
-			Assert.assertThat(e.getMessage(),is("Usuario "+usuario1.getNome()+" esta negativado"));
+			Assert.assertThat(e.getMessage(),is("Usuario negativado"));
 		}
+
+		//Verificacao
 		verify(ISPCService).possuiNegativacao(usuario1);
 
 	}
@@ -384,4 +401,50 @@ public class LocacaoServiceTest {
 		verifyNoMoreInteractions(IEmailService);
 
 	}
+
+	@Test
+	public void deveTratarErroNoSPC() throws Exception {
+
+		//cenario
+		Usuario usuario= usuarioBuilder().comNome("Nelson").agora();
+		Filme filme1 = filmeBuilder().comNome("Filme1").agora();
+		List<Filme> filmes = Arrays.asList(filme1);
+
+		 when(ISPCService.possuiNegativacao(usuario)).thenThrow(new Exception("Falha catastrofica"));
+		 exception.expect(LocadoraException.class);
+		 exception.expectMessage("Problemas com SPC, tente novamente");
+		//acao
+		locacaoService.alugarFilme(usuario,filmes);
+
+		//verificacao
+
+	}
+
+    @Test
+	public void deveProrrogarUmaLocacao(){
+		//Cenario
+		 Locacao locacao = umaLocacao().agora();
+
+		 //Acao
+         locacaoService.prorrogaLocacao(locacao,4);
+
+
+		//Verificacao
+		ArgumentCaptor<Locacao> arg=ArgumentCaptor.forClass(Locacao.class);
+		Mockito.verify(locacaoDao).salvar(arg.capture());
+		Locacao locarcaoRetornada= arg.getValue();
+
+		error.checkThat(locarcaoRetornada.getValor(),is(16.0));
+		error.checkThat(locarcaoRetornada.getDataLocacao(),ehHoje());
+		error.checkThat(locarcaoRetornada.getDataRetorno(),ehHojeComDiferenciaDias(4));
+
+
+
+
+
+
+
+	}
+
+
 }

@@ -63,6 +63,7 @@ public class Calculadora {
 
 
     public  int somar(int a, int b){
+        System.out.println("Estou executando metodo somar");
         return a+b;
     }
 
@@ -77,5 +78,7 @@ public class Calculadora {
         return a/b;
     }
 
-
+    public void imprime(){
+          System.out.println("PAssei aqui");
+    }
 }
