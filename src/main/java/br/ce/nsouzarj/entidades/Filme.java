@@ -35,5 +35,23 @@ public class Filme {
 		this.precoLocacao = precoLocacao;
 	}
 
+	@Override
+	public boolean equals (Object o) {
+		if (this == o) return true;
+		if (!(o instanceof Filme)) return false;
 
+		Filme filme = (Filme) o;
+
+		if (!Objects.equals(nome, filme.nome)) return false;
+		if (!Objects.equals(estoque, filme.estoque)) return false;
+		return Objects.equals(precoLocacao, filme.precoLocacao);
+	}
+
+	@Override
+	public int hashCode () {
+		int result = nome != null ? nome.hashCode() : 0;
+		result = 31 * result + (estoque != null ? estoque.hashCode() : 0);
+		result = 31 * result + (precoLocacao != null ? precoLocacao.hashCode() : 0);
+		return result;
+	}
 }
