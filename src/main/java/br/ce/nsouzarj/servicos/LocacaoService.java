@@ -19,7 +19,7 @@ public class LocacaoService {
 	private ISPCService ISPCService;
 	private IEmailService IEmailService;
 	private String recebe;
-	private double  valorTtotal=0.0;
+
 	private int estoqueFilme=0;
 
 
@@ -36,28 +36,7 @@ public class LocacaoService {
 		}
 
 
-
-		for(int i=0; i < filmes.size(); i++){
-			Filme filme= filmes.get(i);
-			if(filme.getEstoque()==0){
-				throw  new FilmeSemEstoqueException("Filme sem estoque");
-			}
-			Double valorFilme = filme.getPrecoLocacao();
-
-			switch (i){
-				case 2: valorFilme=valorFilme*0.75;
-				break;
-				case 3: valorFilme=valorFilme*0.5;
-				break;
-				case 4: valorFilme=valorFilme*0.25;
-				break;
-				case 5: valorFilme=0.0;
-				break;
-
-			}
-
-			valorTtotal+=valorFilme;
-		}
+		CalcularFilmes(filmes);
 		boolean nega;
 		try {
 			 nega=ISPCService.possuiNegativacao(usuario);
@@ -72,7 +51,7 @@ public class LocacaoService {
 		locacao.setFilme(filmes);
 		locacao.setUsuario(usuario);
 		locacao.setDataLocacao(new Date());
-		locacao.setValor(valorTtotal);
+		locacao.setValor(CalcularFilmes(filmes));
 		locacao.setTotalAluguel(estoqueFilme);
 		
 		//Entrega no dia seguinte
@@ -88,6 +67,31 @@ public class LocacaoService {
 		locacaoDao.salvar(locacao);
 
 	    return locacao;
+	}
+
+	private Double CalcularFilmes (List<Filme> filmes) throws FilmeSemEstoqueException {
+		System.out.println("Entrou no calculo.");
+		Double  valorTtotal=0.0;
+		for(int i = 0; i < filmes.size(); i++){
+			Filme filme= filmes.get(i);
+			if(filme.getEstoque()==0){
+				throw  new FilmeSemEstoqueException("Filme sem estoque");
+			}
+			Double valorFilme = filme.getPrecoLocacao();
+
+			switch (i){
+				case 2: valorFilme=valorFilme*0.75;
+				break;
+				case 3: valorFilme=valorFilme*0.5;
+				break;
+				case 4: valorFilme=valorFilme*0.25;
+				break;
+				case 5: valorFilme=0.0;
+				break;
+			}
+			valorTtotal+=valorFilme;
+		}
+		return  valorTtotal;
 	}
 
 	public void notificarAtrasos(){
@@ -122,4 +126,7 @@ public class LocacaoService {
 //	public void setEmailService (IEmailService IEmailService) {
 //		this.IEmailService = IEmailService;
 //	}
+
+
+
 }
